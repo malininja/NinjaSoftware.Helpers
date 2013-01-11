@@ -19,9 +19,10 @@ namespace NinjaSoftware.Mvc
         /// If general exception is thrown, it rollbacks transaction and rethrows exception.
         /// If UserException or ORMConcurrencyException is thrown, it rollbacks transaction and adds ModelError with exception message.
         /// </summary>
-        public bool PohraniViewModel(IViewModel viewModel, DataAccessAdapterBase adapter)
+        public bool TryUpdateAndSaveIViewModel<T>(T viewModel, DataAccessAdapterBase adapter) 
+            where T : class, IViewModel
         {
-            return SaveModel(viewModel, adapter, null, null);
+            return TryUpdateAndSaveModel(viewModel, adapter, null, null);
         }
 
         /// <summary>
@@ -30,49 +31,20 @@ namespace NinjaSoftware.Mvc
         /// If general exception is thrown, it rollbacks transaction and rethrows exception.
         /// If UserException or ORMConcurrencyException is thrown, it rollbacks transaction and adds ModelError with exception message.
         /// </summary>
-        public bool PohraniCommonEntityBase(IEntity2 entity, DataAccessAdapterBase adapter, bool refetchAfterSave, bool recurse)
+        public bool TryUpdateAndSaveIEntity2<T>(T entity, DataAccessAdapterBase adapter, bool refetchAfterSave, bool recurse)
+            where T : class, IEntity2
         {
-            return SaveModel(entity, adapter, null, null);
-        }
-
-        /// <summary>
-        /// Used when model is passed as interface or base class, and update properties are defined in other type.
-        /// </summary>
-        private bool CustomTryUpdateModel(object model, Type viewModelType)
-        {
-            if (model == null)
-            {
-                throw new ArgumentNullException("model");
-            }
-            if (ValueProvider == null)
-            {
-                throw new ArgumentNullException("valueProvider");
-            }
-
-            Predicate<string> propertyFilter = propertyName => true;
-            IModelBinder binder = Binders.GetBinder(viewModelType);
-
-            ModelBindingContext bindingContext = new ModelBindingContext()
-            {
-                ModelMetadata = ModelMetadataProviders.Current.GetMetadataForType(() => model, viewModelType),
-                ModelState = ModelState,
-                PropertyFilter = propertyFilter,
-                ValueProvider = ValueProvider
-            };
-            binder.BindModel(ControllerContext, bindingContext);
-
-            return ModelState.IsValid;
+            return TryUpdateAndSaveModel(entity, adapter, refetchAfterSave, recurse);
         }
 
         /// <summary>
         /// Generic method for saving IViewModel and IEntity2.
         /// Method is expecting 'ORMConcurrencyExceptionMessage' key in AppSettings.
         /// </summary>
-        private bool SaveModel(object model, DataAccessAdapterBase adapter, bool? refetchAfterSave, bool? recurse)
+        private bool TryUpdateAndSaveModel<T>(T model, DataAccessAdapterBase adapter, bool? refetchAfterSave, bool? recurse)
+            where T : class
         {
-            Type type = model.GetType();
-
-            if (CustomTryUpdateModel(model, type))
+            if (TryUpdateModel(model))
             {
                 try
                 {
@@ -88,7 +60,7 @@ namespace NinjaSoftware.Mvc
                     }
                     else
                     {
-                        string exceptionMessage = string.Format("SaveModel doesn't support type {0}.", type.Name);
+                        string exceptionMessage = string.Format("SaveModel don't support type {0}.", model.GetType().Name);
                         throw new NotImplementedException(exceptionMessage);
                     }
 
@@ -99,21 +71,21 @@ namespace NinjaSoftware.Mvc
                 catch (UserException ex)
                 {
                     adapter.Rollback();
-                    ModelState.AddModelError("UserException", ex.Message);
+                    ModelState.AddModelError(ex.GetType().Name, ex.Message);
 
                     return false;
                 }
-                catch (ORMConcurrencyException)
+                catch (ORMConcurrencyException ex)
                 {
                     adapter.Rollback();
 
                     string errorMessage = ConfigurationManager.AppSettings["ORMConcurrencyExceptionMessage"];
                     if (string.IsNullOrWhiteSpace(errorMessage))
                     {
-                        errorMessage = "Other user have changed data. Reload date and enter changes.";
+                        errorMessage = "Other user have changed data. Reload data and enter changes.";
                     }
 
-                    ModelState.AddModelError("ORMConcurrencyException", errorMessage);
+                    ModelState.AddModelError(ex.GetType().Name, errorMessage);
 
                     return false;
                 }
