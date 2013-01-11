@@ -6,7 +6,7 @@ using System.Text;
 namespace NinjaSoftware.Core
 {
     /// <summary>
-    /// Used for data validation.
+    /// Used for user input validation.
     /// When validation brakes, throw this exception in bussines logic.
     /// It will bubble to client which will, hopefully :-), handle it properly, and display message to user.
     /// </summary>

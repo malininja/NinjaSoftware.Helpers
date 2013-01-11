@@ -11,8 +11,6 @@ namespace NinjaSoftware.Mvc
 {
     public class NinjaSoftwareController : Controller
     {
-        #region SaveModel
-
         /// <summary>
         /// If TryUpdateModel passes, it opens transaction and call IViewModel.Save.
         /// If IViewModel.Save passes, it commits transaction and returns true.
@@ -105,7 +103,5 @@ namespace NinjaSoftware.Mvc
                 return false;
             }
         }
-
-        #endregion
     }
 }
