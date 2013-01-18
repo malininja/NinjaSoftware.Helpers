@@ -40,17 +40,19 @@
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Data" />
+    <Reference Include="System.Web" />
     <Reference Include="System.Web.Mvc, Version=4.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL" />
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="NinjaSoftwareController.cs" />
     <Compile Include="Interfaces.cs" />
+    <Compile Include="PagerBase.cs" />
     <Compile Include="ViewHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\NinjaSoftware.Core\NinjaSoftware.Core.csproj">
+    <ProjectReference Include="..\NinjaSoftware.Api.Core\NinjaSoftware.Api.Core.csproj">
       <Project>{DE4AA8E8-AFA5-42B7-9BD8-B75BA7F9BDA3}</Project>
       <Name>NinjaSoftware.Core</Name>
     </ProjectReference>

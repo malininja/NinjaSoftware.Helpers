@@ -5,7 +5,7 @@ using System.Text;
 using SD.LLBLGen.Pro.ORMSupportClasses;
 using System.Configuration;
 
-namespace NinjaSoftware.CoolJ
+namespace NinjaSoftware.Api.CoolJ
 {
     public class OptimisticConcurrencyPredicateFactory : IConcurrencyPredicateFactory
     {

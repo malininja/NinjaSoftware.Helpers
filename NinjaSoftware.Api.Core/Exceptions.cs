@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace NinjaSoftware.Core
+namespace NinjaSoftware.Api.Core
 {
     /// <summary>
     /// Used for user input validation.

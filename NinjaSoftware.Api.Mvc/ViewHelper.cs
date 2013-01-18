@@ -5,7 +5,7 @@ using System.Text;
 using System.Web.Mvc;
 using System.Configuration;
 
-namespace NinjaSoftware.Mvc
+namespace NinjaSoftware.Api.Mvc
 {
     public static class ViewHelper
     {

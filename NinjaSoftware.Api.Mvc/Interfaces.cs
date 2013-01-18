@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using SD.LLBLGen.Pro.ORMSupportClasses;
 
-namespace NinjaSoftware.Mvc
+namespace NinjaSoftware.Api.Mvc
 {
     public interface IViewModel
     {

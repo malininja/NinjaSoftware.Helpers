@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using SD.LLBLGen.Pro.ORMSupportClasses;
 using System.Web.Mvc;
-using NinjaSoftware.Core;
+using NinjaSoftware.Api.Core;
 using System.Configuration;
 
-namespace NinjaSoftware.Mvc
+namespace NinjaSoftware.Api.Mvc
 {
     public class NinjaSoftwareController : Controller
     {
