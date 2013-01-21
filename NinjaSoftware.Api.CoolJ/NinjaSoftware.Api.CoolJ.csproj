@@ -40,6 +40,7 @@
     <Reference Include="Microsoft.CSharp" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="INsDataAccessAdapter.cs" />
     <Compile Include="OptimisticConcurrencyPredicateFactory.cs" />
     <Compile Include="PredicateHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
