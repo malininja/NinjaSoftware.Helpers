@@ -7,6 +7,6 @@ namespace NinjaSoftware.CoolJ
 {
     public interface INsDataAccessAdapter
     {
-        long UserId { get; set; }
+        long? UserId { get; set; }
     }
 }
