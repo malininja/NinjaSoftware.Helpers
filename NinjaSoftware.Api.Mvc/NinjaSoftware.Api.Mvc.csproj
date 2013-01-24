@@ -45,8 +45,8 @@
     <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="NinjaSoftwareController.cs" />
-    <Compile Include="Interfaces.cs" />
+    <Compile Include="NsController.cs" />
+    <Compile Include="IViewModel.cs" />
     <Compile Include="PagerBase.cs" />
     <Compile Include="ViewHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

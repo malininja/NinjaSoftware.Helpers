@@ -9,8 +9,10 @@ using System.Configuration;
 
 namespace NinjaSoftware.Api.Mvc
 {
-    public class NinjaSoftwareController : Controller
+    public class NsController : Controller
     {
+        #region Custom TryUpdate
+
         /// <summary>
         /// If TryUpdateModel passes, it opens transaction and call IViewModel.Save.
         /// If IViewModel.Save passes, it commits transaction and returns true.
@@ -69,11 +71,20 @@ namespace NinjaSoftware.Api.Mvc
                 catch (UserException ex)
                 {
                     adapter.Rollback();
-                    ModelState.AddModelError(ex.GetType().Name, ex.Message);
+
+                    StringBuilder bob = new StringBuilder();
+
+                    foreach (string userError in ex.UserErrorList)
+                    {
+                        bob.Append(userError);
+                        bob.Append("<br />");
+                    }
+
+                    this.ViewUserErrorMessage = bob.ToString();
 
                     return false;
                 }
-                catch (ORMConcurrencyException ex)
+                catch (ORMConcurrencyException)
                 {
                     adapter.Rollback();
 
@@ -83,7 +94,7 @@ namespace NinjaSoftware.Api.Mvc
                         errorMessage = "Other user have changed data. Reload data and enter changes.";
                     }
 
-                    ModelState.AddModelError(ex.GetType().Name, errorMessage);
+                    this.ViewUserErrorMessage = errorMessage;
 
                     return false;
                 }
@@ -99,9 +110,22 @@ namespace NinjaSoftware.Api.Mvc
             }
             else
             {
+                if (model is IViewModel)
+                {
+                    ((IViewModel)model).LoadViewSpecificData(adapter);
+                }
+
                 adapter.Dispose();
                 return false;
             }
         }
+
+        #endregion
+
+        #region Properties
+
+        public string ViewUserErrorMessage { get; set; }
+
+        #endregion
     }
 }
