@@ -11,33 +11,32 @@ namespace NinjaSoftware.Api.Mvc
 {
     public abstract class PagerBase
     {
-        #region Constructors
-
-        public PagerBase(int pageSize)
-        {
-            this.PageSize = pageSize;
-        }
-
-        #endregion
-
-        #region Private members
+        #region Protected members
 
         /// <summary>
         /// Calls abstract LoadData which sets DataSource i PageSize.
         /// Calculate and set NoOfPages.
         /// </summary>
-        protected void LoadData(DataAccessAdapterBase adapter,
-            int pageNo,
+        public void LoadData(DataAccessAdapterBase adapter,
+            int? currentPage,
+            int pageSize,
             string sortField,
-            string sortDirection,
-            string jqGridFilters)
+            bool? isSortAscending)
         {
-            this.CurrentPage = pageNo;
+            this.PageSize = pageSize;
+            this.CurrentPage = currentPage.HasValue ? currentPage.Value : 1;
 
             string sort = string.IsNullOrWhiteSpace(sortField) ? this.DefaultSortField : sortField;
-            string direction = string.IsNullOrWhiteSpace(sortDirection) ? this.DefaultSortDirection : sortDirection;
+            if (isSortAscending.HasValue)
+            {
+                this.IsSortDirectionAscending = isSortAscending.Value;
+            }
+            else
+            {
+                this.IsSortDirectionAscending = this.IsDefaultSortDirectionAscending;
+            }
 
-            LoadData(adapter, pageNo, this.PageSize, sort, direction);
+            SetDataSource(adapter, this.CurrentPage, this.PageSize, sort, this.IsSortDirectionAscending);
             NoOfPages = CalculateNoOfPages(NoOfRecords, this.PageSize);
         }
 
@@ -48,15 +47,15 @@ namespace NinjaSoftware.Api.Mvc
         /// <summary>
         /// Set DataSource i PageSize.
         /// </summary>
-        protected abstract void LoadData(DataAccessAdapterBase adapter,
+        protected abstract void SetDataSource(DataAccessAdapterBase adapter,
             int pageNumber,
             int pageSize,
             string sortField,
-            string sortDirection);
+            bool isSortAscending);
 
         public abstract string DefaultSortField { get; }
 
-        public abstract string DefaultSortDirection { get; }
+        public abstract bool IsDefaultSortDirectionAscending { get; }
 
         #endregion
 
@@ -72,25 +71,8 @@ namespace NinjaSoftware.Api.Mvc
         /// </summary>
         public int NoOfRecords { get; protected set; }
 
-        #endregion
-
-        #region HTML generation
-
-        //public HtmlString GeneratePagerNavigation(RequestContext requestContext,
-        //    string actionName,
-        //    RouteValueDictionary routeValues)
-        //{
-        //    UrlHelper urlHelper = new UrlHelper(requestContext);
-
-        //    for (int i = 1; i <= NoOfPages; i++)
-        //    {
-        //        string fetchDataUrl = urlHelper.Action(actionName, routeValues);
-            
-        //    }
-            
-
-
-        //}
+        public string SortField { get; set; }
+        public bool IsSortDirectionAscending { get; set; }
 
         #endregion
 
