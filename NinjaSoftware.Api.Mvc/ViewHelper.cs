@@ -30,5 +30,33 @@ namespace NinjaSoftware.Api.Mvc
 
             return toReturn;
         }
+
+        public static string ToLocalizedWord(this bool value)
+        {
+            string language = System.Threading.Thread.CurrentThread.CurrentUICulture.TwoLetterISOLanguageName;
+
+            if ("hr" == language)
+            {
+                if (value)
+                {
+                    return "da";
+                }
+                else
+                {
+                    return "ne";
+                }
+            }
+            else
+            {
+                if (value)
+                {
+                    return "yes";
+                }
+                else
+                {
+                    return "no";
+                }
+            }
+        }
     }
 }

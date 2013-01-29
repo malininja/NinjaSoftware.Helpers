@@ -105,5 +105,43 @@ namespace NinjaSoftware.Api.Mvc
         }
 
         #endregion
+
+        #region ViewElementsGeneration
+
+        public HtmlString GenerateDropDownPagingHtmlElements(string dropDownPrefixText)
+        {
+            StringBuilder bob = new StringBuilder();
+            string isSelectedString = @"selected=""selected""";
+            for (int i = 1; i <= this.NoOfPages; i++)
+            {
+                bob.Append(string.Format(@"<option {0} value=""{1}"">{1}</option>",
+                    i == this.CurrentPage ? isSelectedString : string.Empty,
+                    i));
+            }
+
+            HtmlString htmlString = new HtmlString(string.Format(
+@"{0} <select id=""CurrentPage"" name=""CurrentPage"" onchange=""pagerNavigationSetGridPage(this.value)"">{1}</select> / {2}
+<script type=""text/javascript"">
+function pagerNavigationSetGridPage(newPageNo) {{
+var sort = ninjaSoftware.url.getParameterValue(""sortField"");
+var sortDir = ninjaSoftware.url.getParameterValue(""sortDirection"");
+var url = this.location.pathname + ""?"";
+var isFirst = true;
+if ("""" != sort || """" != sortDir) {{
+url = url + ""sortField="" + sort + ""&sortDirection="" + sortDir;
+isFirst = false;
+}}
+if (!isFirst) {{
+url = url + ""&"";
+}}
+url = url + ""pageNumber="" + newPageNo;
+this.location.href = url;
+}}
+</script>", dropDownPrefixText, bob.ToString(), this.NoOfPages));
+
+            return htmlString;
+        }
+
+        #endregion
     }
 }
