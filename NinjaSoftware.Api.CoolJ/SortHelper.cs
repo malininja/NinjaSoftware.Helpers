@@ -17,16 +17,6 @@ namespace NinjaSoftware.Api.CoolJ
         /// <param name="sortDirection">Valid values are 'asc' i 'desc'.</param>
         public static SortExpression GetSortExpression(string sortField, string sortDirection, Type entityFieldsClass)
         {
-            string[] entityNames = sortField.Split('.');
-
-            if (entityNames.Count() > 1)
-            {
-                sortField = entityNames[entityNames.Count() - 1];
-                entityFieldsClass = Type.GetType(string.Format("{0}{1}Fields",
-                    entityFieldsClass.FullName.Replace(entityFieldsClass.Name, ""),
-                    entityNames[entityNames.Count() - 2]));
-            }
-
             EntityField2 orderEntityField = (EntityField2)entityFieldsClass.GetProperty(sortField, BindingFlags.Public | BindingFlags.Static).GetValue(null, null);
 
             SortOperator sortOperator;
@@ -44,6 +34,40 @@ namespace NinjaSoftware.Api.CoolJ
             }
 
             return new SortExpression(orderEntityField | sortOperator);
+        }
+
+        public static string GetEntityFieldTypeNameForSorting(string sortField, Type entityFieldsClass)
+        {
+            string[] entityNames = sortField.Split('.');
+
+            if (entityNames.Count() > 1)
+            {
+                string entityFieldTypeName = string.Format("{0}{1}Fields",
+                    entityFieldsClass.FullName.Replace(entityFieldsClass.Name, ""),
+                    entityNames[entityNames.Count() - 2]);
+
+                return entityFieldTypeName;
+            }
+            else
+            {
+                return null;
+            }
+        }
+
+        public static string GetSortField(string sortField)
+        {
+            string[] entityNames = sortField.Split('.');
+
+            if (entityNames.Count() > 1)
+            {
+                sortField = entityNames[entityNames.Count() - 1];
+
+                return sortField;
+            }
+            else
+            {
+                return sortField;
+            }
         }
     }
 }
