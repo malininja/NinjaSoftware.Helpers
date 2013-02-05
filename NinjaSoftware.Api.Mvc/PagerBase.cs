@@ -110,6 +110,33 @@ namespace NinjaSoftware.Api.Mvc
 
         public HtmlString GenerateDropDownPagingHtmlElements(string dropDownPrefixText)
         {
+            return new HtmlString(this.GenerateDropDownPagingHtmlElementsPrivate(dropDownPrefixText));
+        }
+
+        public HtmlString GenerateDropDownPagingAndPrevNextHtmlElements(string dropDownPrefixText)
+        {
+            StringBuilder bob = new StringBuilder();
+
+            string linkPattern = "<span style='cursor: pointer;' onclick='pagerNavigationSetGridPage({0})'>&nbsp;&nbsp;{1}&nbsp;&nbsp;</span>";
+            string htmlSpace = "&nbsp;&nbsp;";
+
+            if (1 != this.CurrentPage)
+            {
+                bob.Append(string.Format(linkPattern, this.CurrentPage - 1, "<"));
+            }
+
+            bob.Append(this.GenerateDropDownPagingHtmlElementsPrivate(dropDownPrefixText));
+
+            if (this.CurrentPage != this.NoOfPages)
+            {
+                bob.Append(string.Format(linkPattern, this.CurrentPage + 1, ">"));
+            }
+
+            return new HtmlString(bob.ToString());
+        }
+
+        private string GenerateDropDownPagingHtmlElementsPrivate(string dropDownPrefixText)
+        {
             StringBuilder bob = new StringBuilder();
             string isSelectedString = @"selected=""selected""";
             for (int i = 1; i <= this.NoOfPages; i++)
@@ -119,7 +146,7 @@ namespace NinjaSoftware.Api.Mvc
                     i));
             }
 
-            HtmlString htmlString = new HtmlString(string.Format(
+            string html = string.Format(
 @"{0} <select id=""CurrentPage"" name=""CurrentPage"" onchange=""pagerNavigationSetGridPage(this.value)"">{1}</select> / {2}
 <script type=""text/javascript"">
 function pagerNavigationSetGridPage(newPageNo) {{
@@ -137,9 +164,9 @@ url = url + ""&"";
 url = url + ""pageNumber="" + newPageNo;
 this.location.href = url;
 }}
-</script>", dropDownPrefixText, bob.ToString(), this.NoOfPages));
+</script>", dropDownPrefixText, bob.ToString(), this.NoOfPages);
 
-            return htmlString;
+            return html;
         }
 
         #endregion
