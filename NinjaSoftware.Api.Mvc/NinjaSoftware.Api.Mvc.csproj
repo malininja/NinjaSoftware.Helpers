@@ -54,7 +54,7 @@
   <ItemGroup>
     <ProjectReference Include="..\NinjaSoftware.Api.Core\NinjaSoftware.Api.Core.csproj">
       <Project>{DE4AA8E8-AFA5-42B7-9BD8-B75BA7F9BDA3}</Project>
-      <Name>NinjaSoftware.Core</Name>
+      <Name>NinjaSoftware.Api.Core</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
