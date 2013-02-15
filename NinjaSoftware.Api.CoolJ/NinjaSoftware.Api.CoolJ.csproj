@@ -8,8 +8,8 @@
     <ProjectGuid>{0BCADAF3-9BE9-4C51-BDE6-47137B343A0E}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NinjaSoftware.CoolJ</RootNamespace>
-    <AssemblyName>NinjaSoftware.CoolJ</AssemblyName>
+    <RootNamespace>NinjaSoftware.Api.CoolJ</RootNamespace>
+    <AssemblyName>NinjaSoftware.Api.CoolJ</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -31,6 +31,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\Dlls\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="SD.LLBLGen.Pro.ORMSupportClasses.NET20, Version=3.5.0.0, Culture=neutral, PublicKeyToken=ca73b74ba4e3ff27, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Dlls\SD.LLBLGen.Pro.ORMSupportClasses.NET20.dll</HintPath>
@@ -38,8 +41,11 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.XML" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EntityCollectionExtensions.cs" />
+    <Compile Include="IEntity2Extensions.cs" />
     <Compile Include="INsDataAccessAdapter.cs" />
     <Compile Include="OptimisticConcurrencyPredicateFactory.cs" />
     <Compile Include="PredicateHelper.cs" />
