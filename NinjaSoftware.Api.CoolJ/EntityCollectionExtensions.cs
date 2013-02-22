@@ -29,7 +29,7 @@ namespace NinjaSoftware.Api.CoolJ
                 foreach (TEntity entity in entityCollection)
                 {
                     TEntity entityWhichUpdates = deserializedCollection.Where(p => 
-                        object.Equals(p.Fields[primaryKeyField.Name].CurrentValue, entity.Fields[primaryKeyField.Name])).SingleOrDefault();
+                        object.Equals(p.Fields[primaryKeyField.Name].CurrentValue, entity.Fields[primaryKeyField.Name].CurrentValue)).SingleOrDefault();
 
                     if (null != entityWhichUpdates)
                     {
@@ -58,7 +58,7 @@ namespace NinjaSoftware.Api.CoolJ
                 foreach (TEntity entity in entityCollection)
                 {
                     TEntity entityWhichUpdates = deserializedCollection.Where(e => 
-                        object.Equals(e.Fields[pkName].CurrentValue, entity.Fields[pkName])).SingleOrDefault();
+                        object.Equals(e.Fields[pkName].CurrentValue, entity.Fields[pkName].CurrentValue)).SingleOrDefault();
 
                     if (null == entityWhichUpdates)
                     {
