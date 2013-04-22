@@ -5,7 +5,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{0BCADAF3-9BE9-4C51-BDE6-47137B343A0E}</ProjectGuid>
+    <ProjectGuid>{F6384833-E473-41B5-BD3A-638ECE207755}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>NinjaSoftware.Api.CoolJ</RootNamespace>

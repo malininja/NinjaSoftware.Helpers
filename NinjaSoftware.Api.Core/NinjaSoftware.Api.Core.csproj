@@ -5,7 +5,7 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{DE4AA8E8-AFA5-42B7-9BD8-B75BA7F9BDA3}</ProjectGuid>
+    <ProjectGuid>{A877677C-DF86-4016-8AE5-738D4529B1A9}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>NinjaSoftware.Api.Core</RootNamespace>

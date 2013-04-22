@@ -150,19 +150,9 @@ namespace NinjaSoftware.Api.Mvc
 @"{0} <select id=""CurrentPage"" name=""CurrentPage"" onchange=""pagerNavigationSetGridPage(this.value)"">{1}</select> / {2}
 <script type=""text/javascript"">
 function pagerNavigationSetGridPage(newPageNo) {{
-var sort = ninjaSoftware.url.getParameterValue(""sortField"");
-var sortDir = ninjaSoftware.url.getParameterValue(""sortDirection"");
-var url = this.location.pathname + ""?"";
-var isFirst = true;
-if ("""" != sort || """" != sortDir) {{
-url = url + ""sortField="" + sort + ""&sortDirection="" + sortDir;
-isFirst = false;
-}}
-if (!isFirst) {{
-url = url + ""&"";
-}}
-url = url + ""pageNumber="" + newPageNo;
-this.location.href = url;
+    var queryParameters = {{ }};
+    queryParameters['pageNumber'] = newPageNo;
+    ninjaSoftware.url.setParameters(queryParameters);
 }}
 </script>", dropDownPrefixText, bob.ToString(), this.NoOfPages);
 

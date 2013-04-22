@@ -45,14 +45,14 @@ namespace NinjaSoftware.Api.CoolJ
             }
         }
 
-        public static List<TEntity> GetEntitiesNotIncludedInJson<TEntity>(this EntityCollectionBase2<TEntity> entityCollection, string jsonData)
+        public static List<TEntity> GetEntitiesNotIncludedInJson<TEntity>(this EntityCollectionBase2<TEntity> entityCollection, string jsonData, JsonSerializerSettings jsonSettings)
             where TEntity : EntityBase2, IEntity2
         {
             List<TEntity> toReturn = new List<TEntity>();
 
             if (entityCollection.Count > 0)
             {
-                IEnumerable<TEntity> deserializedCollection = JsonConvert.DeserializeObject<IEnumerable<TEntity>>(jsonData);
+                IEnumerable<TEntity> deserializedCollection = JsonConvert.DeserializeObject<IEnumerable<TEntity>>(jsonData, jsonSettings);
                 string pkName = entityCollection[0].GetPrimaryKeyName();
 
                 foreach (TEntity entity in entityCollection)

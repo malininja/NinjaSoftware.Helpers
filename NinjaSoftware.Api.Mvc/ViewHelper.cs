@@ -25,7 +25,7 @@ namespace NinjaSoftware.Api.Mvc
 
             if (null != dataSource)
             {
-                toReturn.AddRange(new SelectList(dataSource, valuePropertyName, textPropertyName, ConfigurationManager.AppSettings["FirstDropDownItemText"]));
+                toReturn.AddRange(new SelectList(dataSource, valuePropertyName, textPropertyName, selectedValue));
             }
 
             return toReturn;

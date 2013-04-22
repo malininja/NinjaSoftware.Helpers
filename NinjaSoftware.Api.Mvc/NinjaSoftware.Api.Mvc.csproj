@@ -5,11 +5,11 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProductVersion>8.0.30703</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
-    <ProjectGuid>{4D6AE12C-C700-4AB6-A97F-66C9246F0420}</ProjectGuid>
+    <ProjectGuid>{654026CA-BC27-41D4-8D6E-059C1F6A2D30}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>NinjaSoftware.Mvc</RootNamespace>
-    <AssemblyName>NinjaSoftware.Mvc</AssemblyName>
+    <RootNamespace>NinjaSoftware.Api.Mvc</RootNamespace>
+    <AssemblyName>NinjaSoftware.Api.Mvc</AssemblyName>
     <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -31,6 +31,10 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="NinjaSoftware.Api.Core, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\NinjaSoftware.Api.Core\bin\Release\NinjaSoftware.Api.Core.dll</HintPath>
+    </Reference>
     <Reference Include="SD.LLBLGen.Pro.ORMSupportClasses.NET20, Version=3.5.0.0, Culture=neutral, PublicKeyToken=ca73b74ba4e3ff27, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\Dlls\SD.LLBLGen.Pro.ORMSupportClasses.NET20.dll</HintPath>
@@ -50,12 +54,6 @@
     <Compile Include="PagerBase.cs" />
     <Compile Include="ViewHelper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\NinjaSoftware.Api.Core\NinjaSoftware.Api.Core.csproj">
-      <Project>{DE4AA8E8-AFA5-42B7-9BD8-B75BA7F9BDA3}</Project>
-      <Name>NinjaSoftware.Api.Core</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
