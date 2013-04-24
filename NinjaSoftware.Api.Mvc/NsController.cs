@@ -74,13 +74,25 @@ namespace NinjaSoftware.Api.Mvc
 
                     StringBuilder bob = new StringBuilder();
 
-                    foreach (string userError in ex.UserErrorList)
+                    if (null != ex.UserErrorList && ex.UserErrorList.Count > 0)
                     {
-                        bob.Append(userError);
-                        bob.Append("<br />");
+                        foreach (string userError in ex.UserErrorList)
+                        {
+                            bob.Append(userError);
+                            bob.Append("<br />");
+                        }
+                    }
+                    else if (!string.IsNullOrWhiteSpace(ex.Message))
+                    {
+                        bob.Append(ex.Message);
                     }
 
                     this.ViewUserErrorMessage = bob.ToString();
+
+                    if (model is IViewModel)
+                    {
+                        ((IViewModel)model).LoadViewSpecificData(adapter);
+                    }
 
                     return false;
                 }
@@ -95,6 +107,11 @@ namespace NinjaSoftware.Api.Mvc
                     }
 
                     this.ViewUserErrorMessage = errorMessage;
+
+                    if (model is IViewModel)
+                    {
+                        ((IViewModel)model).LoadViewSpecificData(adapter);
+                    }
 
                     return false;
                 }
