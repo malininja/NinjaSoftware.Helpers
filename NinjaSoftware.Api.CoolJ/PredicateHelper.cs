@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using SD.LLBLGen.Pro.ORMSupportClasses;
+using Newtonsoft.Json;
+using System.Reflection;
 
 namespace NinjaSoftware.Api.CoolJ
 {
@@ -97,5 +99,93 @@ namespace NinjaSoftware.Api.CoolJ
 
             return predicateExpression;
         }
+
+        public static PredicateExpression CreatePredicateFromJqGridFilterString(string jqGridFilterString, Type entityType)
+        {
+            JgGridFilter jqGridFilter = JsonConvert.DeserializeObject<JgGridFilter>(jqGridFilterString);
+
+            if (jqGridFilter != null && jqGridFilter.rules.Count() > 0)
+            {
+                return jqGridFilter.KreirajPredicate(entityType);
+            }
+            else
+            {
+                return null;
+            }
+        }
+    }
+
+    public class JgGridFilter
+    {
+        public string groupOp { get; set; }
+        public IEnumerable<JqGridFilterItem> rules { get; set; }
+
+        /// <summary>
+        /// Preko refleksije izvlači EntityField2 za filtriranje iz rules.
+        /// Ako je rules.Count == 0 vraća NULL.
+        /// </summary>
+        /// <param name="entityFieldsClass">Ako se filtriraju lijekovi onda LijekFields.</param>
+        /// <returns>PredicateExpression</returns>
+        public PredicateExpression KreirajPredicate(Type entityFieldsClass)
+        {
+            PredicateExpression toReturn = null;
+
+            if (rules.Count() > 0)
+            {
+                toReturn = new PredicateExpression();
+
+                foreach (JqGridFilterItem item in rules)
+                {
+                    Predicate predicateToAdd = JgGridFilter.KreirajPredikatIzJqGridFilterItem(entityFieldsClass, item);
+
+                    if (groupOp.ToUpper() == "AND")
+                    {
+                        toReturn.AddWithAnd(predicateToAdd);
+                    }
+                    else if (groupOp.ToUpper() == "OR")
+                    {
+                        toReturn.AddWithOr(predicateToAdd);
+                    }
+                }
+            }
+
+            return toReturn;
+        }
+
+        /// <summary>
+        /// Preko refleksije izvlači EntityField2 za filtriranje iz rules.
+        /// </summary>
+        /// <param name="entityFieldsClass">Ako se filtriraju lijekovi onda LijekFields.</param>
+        public static Predicate KreirajPredikatIzJqGridFilterItem(Type entityFieldsClass, JqGridFilterItem jqGridFilterItem)
+        {
+            string filterFieldName;
+            string[] entityNames = jqGridFilterItem.field.Split('.');
+
+            // Ako je zatočkano, npr. vraćeni field je "Dobavljac.Naziv",
+            // tada entityFieldClass nije onaj poslani nego DobavljacEntity.
+            if (entityNames.Count() > 1)
+            {
+                filterFieldName = entityNames[entityNames.Count() - 1];
+                entityFieldsClass = Type.GetType(string.Format("CareSense.ORMEntities.HelperClasses.{0}Fields", entityNames[entityNames.Count() - 2]));
+            }
+            else
+            {
+                filterFieldName = jqGridFilterItem.field;
+            }
+
+            EntityField2 filterField = (EntityField2)entityFieldsClass.GetProperty(filterFieldName, BindingFlags.Public | BindingFlags.Static).GetValue(null, null);
+
+            FieldLikePredicate toReturn = new FieldLikePredicate(filterField, null, string.Format("{0}%", jqGridFilterItem.data.ToUpper()));
+            toReturn.CaseSensitiveCollation = true;
+
+            return toReturn;
+        }
+    }
+
+    public class JqGridFilterItem
+    {
+        public string field { get; set; }
+        public string op { get; set; }
+        public string data { get; set; }
     }
 }
