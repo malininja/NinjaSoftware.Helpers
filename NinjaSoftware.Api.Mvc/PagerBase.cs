@@ -6,6 +6,7 @@ using SD.LLBLGen.Pro.ORMSupportClasses;
 using System.Web;
 using System.Web.Routing;
 using System.Web.Mvc;
+using Newtonsoft.Json;
 
 namespace NinjaSoftware.Api.Mvc
 {
@@ -18,6 +19,7 @@ namespace NinjaSoftware.Api.Mvc
         /// Calculate and set NoOfPages.
         /// </summary>
         public void LoadData(DataAccessAdapterBase adapter,
+            RelationPredicateBucket bucket,
             int? currentPage,
             int pageSize,
             string sortField,
@@ -36,7 +38,7 @@ namespace NinjaSoftware.Api.Mvc
                 this.IsSortDirectionAscending = this.IsDefaultSortDirectionAscending;
             }
 
-            SetDataSource(adapter, this.CurrentPage, this.PageSize, sort, this.IsSortDirectionAscending);
+            SetDataSource(adapter, bucket, this.CurrentPage, this.PageSize, sort, this.IsSortDirectionAscending);
             NoOfPages = CalculateNoOfPages(NoOfRecords, this.PageSize);
         }
 
@@ -48,6 +50,7 @@ namespace NinjaSoftware.Api.Mvc
         /// Set DataSource i PageSize.
         /// </summary>
         protected abstract void SetDataSource(DataAccessAdapterBase adapter,
+            RelationPredicateBucket bucket,
             int pageNumber,
             int pageSize,
             string sortField,
@@ -106,57 +109,29 @@ namespace NinjaSoftware.Api.Mvc
 
         #endregion
 
-        #region ViewElementsGeneration
+        #region JqGrid
 
-        public HtmlString GenerateDropDownPagingHtmlElements(string dropDownPrefixText)
+        public static bool? IsJqgridSortAscending(string sord)
         {
-            return new HtmlString(this.GenerateDropDownPagingHtmlElementsPrivate(dropDownPrefixText));
+            if (string.IsNullOrWhiteSpace(sord))
+            {
+                return false;
+            }
+
+            return "asc" == sord.Trim().ToLowerInvariant();
         }
 
-        public HtmlString GenerateDropDownPagingAndPrevNextHtmlElements(string dropDownPrefixText)
+        public string CreateJqGridRespose()
         {
-            StringBuilder bob = new StringBuilder();
-
-            string linkPattern = "<span style='cursor: pointer;' onclick='pagerNavigationSetGridPage({0})'>&nbsp;&nbsp;{1}&nbsp;&nbsp;</span>";
-            string htmlSpace = "&nbsp;&nbsp;";
-
-            if (1 != this.CurrentPage)
+            object result = new
             {
-                bob.Append(string.Format(linkPattern, this.CurrentPage - 1, "<"));
-            }
+                page = this.CurrentPage,
+                total = this.NoOfPages,
+                records = this.NoOfRecords,
+                rows = this.DataSource
+            };
 
-            bob.Append(this.GenerateDropDownPagingHtmlElementsPrivate(dropDownPrefixText));
-
-            if (this.CurrentPage != this.NoOfPages)
-            {
-                bob.Append(string.Format(linkPattern, this.CurrentPage + 1, ">"));
-            }
-
-            return new HtmlString(bob.ToString());
-        }
-
-        private string GenerateDropDownPagingHtmlElementsPrivate(string dropDownPrefixText)
-        {
-            StringBuilder bob = new StringBuilder();
-            string isSelectedString = @"selected=""selected""";
-            for (int i = 1; i <= this.NoOfPages; i++)
-            {
-                bob.Append(string.Format(@"<option {0} value=""{1}"">{1}</option>",
-                    i == this.CurrentPage ? isSelectedString : string.Empty,
-                    i));
-            }
-
-            string html = string.Format(
-@"{0} <select id=""CurrentPage"" name=""CurrentPage"" onchange=""pagerNavigationSetGridPage(this.value)"">{1}</select> / {2}
-<script type=""text/javascript"">
-function pagerNavigationSetGridPage(newPageNo) {{
-    var queryParameters = {{ }};
-    queryParameters['pageNumber'] = newPageNo;
-    ninjaSoftware.url.setParameters(queryParameters);
-}}
-</script>", dropDownPrefixText, bob.ToString(), this.NoOfPages);
-
-            return html;
+            return JsonConvert.SerializeObject(result);
         }
 
         #endregion
