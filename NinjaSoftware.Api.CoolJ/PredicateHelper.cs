@@ -100,13 +100,16 @@ namespace NinjaSoftware.Api.CoolJ
             return predicateExpression;
         }
 
-        public static PredicateExpression CreatePredicateFromJqGridFilterString(string jqGridFilterString, Type entityType)
+        public static PredicateExpression CreatePredicateFromJqGridFilterString(string jqGridFilterString, 
+        	Type entityType,
+			Func<string, Type> getEntityFieldTypeFunction,
+			string ormEntityHelperClassesNamespace)
         {
             JgGridFilter jqGridFilter = JsonConvert.DeserializeObject<JgGridFilter>(jqGridFilterString);
 
             if (jqGridFilter != null && jqGridFilter.rules.Count() > 0)
             {
-                return jqGridFilter.KreirajPredicate(entityType);
+                return jqGridFilter.KreirajPredicate(entityType, getEntityFieldTypeFunction, ormEntityHelperClassesNamespace);
             }
             else
             {
@@ -126,7 +129,9 @@ namespace NinjaSoftware.Api.CoolJ
         /// </summary>
         /// <param name="entityFieldsClass">Ako se filtriraju lijekovi onda LijekFields.</param>
         /// <returns>PredicateExpression</returns>
-        public PredicateExpression KreirajPredicate(Type entityFieldsClass)
+		public PredicateExpression KreirajPredicate(Type entityFieldsClass, 
+			Func<string, Type> getEntityFieldTypeFunction,
+			string ormEntityHelperClassesNamespace)
         {
             PredicateExpression toReturn = null;
 
@@ -136,7 +141,7 @@ namespace NinjaSoftware.Api.CoolJ
 
                 foreach (JqGridFilterItem item in rules)
                 {
-                    Predicate predicateToAdd = JgGridFilter.KreirajPredikatIzJqGridFilterItem(entityFieldsClass, item);
+                    Predicate predicateToAdd = JgGridFilter.KreirajPredikatIzJqGridFilterItem(entityFieldsClass, item, getEntityFieldTypeFunction, ormEntityHelperClassesNamespace);
 
                     if (groupOp.ToUpper() == "AND")
                     {
@@ -156,7 +161,10 @@ namespace NinjaSoftware.Api.CoolJ
         /// Preko refleksije izvlači EntityField2 za filtriranje iz rules.
         /// </summary>
         /// <param name="entityFieldsClass">Ako se filtriraju lijekovi onda LijekFields.</param>
-        public static Predicate KreirajPredikatIzJqGridFilterItem(Type entityFieldsClass, JqGridFilterItem jqGridFilterItem)
+        public static Predicate KreirajPredikatIzJqGridFilterItem(Type entityFieldsClass, 
+			JqGridFilterItem jqGridFilterItem, 
+			Func<string, Type> getEntityFieldTypeFunction,
+		    string ormEntityHelperClassesNamespace)
         {
             string filterFieldName;
             string[] entityNames = jqGridFilterItem.field.Split('.');
@@ -165,8 +173,19 @@ namespace NinjaSoftware.Api.CoolJ
             // tada entityFieldClass nije onaj poslani nego DobavljacEntity.
             if (entityNames.Count() > 1)
             {
+				if (string.IsNullOrWhiteSpace (ormEntityHelperClassesNamespace)) 
+				{
+					throw new Exception ("OrmEntitiesHelperClassesNamespace is not set in config file");
+				}
+
                 filterFieldName = entityNames[entityNames.Count() - 1];
-                entityFieldsClass = Type.GetType(string.Format("CareSense.ORMEntities.HelperClasses.{0}Fields", entityNames[entityNames.Count() - 2]));
+				string typeName = string.Format ("{0}.{1}Fields", ormEntityHelperClassesNamespace, entityNames [entityNames.Count () - 2]);
+				entityFieldsClass = getEntityFieldTypeFunction (typeName); // Type.GetType(typeName);
+
+				if (entityFieldsClass == null) 
+				{
+					throw new Exception (string.Format ("Type '{0}' does not exist", typeName)); 
+				}
             }
             else
             {
