@@ -100,16 +100,22 @@ namespace NinjaSoftware.Api.CoolJ
             return predicateExpression;
         }
 
+		/// <summary>
+		/// Creates predicate based on jgGridFilterString
+		/// </summary>
+		/// <returns>PredicateExpression</returns>
+		/// <param name="jqGridFilterString">Serialized JSON returned from JqGrid</param>
+		/// <param name="entityType">If you wanna filter PartnerEntity then typeof(PartnerFields)</param>
+		/// <param name="getEntityFieldTypeFunction">Function excepts string (EntityFields type name) and returnes type. In case that you need filtering by entity linked to main entity (Partner.Country), then this function is used to get CountryFields via reflection.</param>
         public static PredicateExpression CreatePredicateFromJqGridFilterString(string jqGridFilterString, 
         	Type entityType,
-			Func<string, Type> getEntityFieldTypeFunction,
-			string ormEntityHelperClassesNamespace)
+			Func<string, Type> getEntityFieldTypeFunction)
         {
             JgGridFilter jqGridFilter = JsonConvert.DeserializeObject<JgGridFilter>(jqGridFilterString);
 
-            if (jqGridFilter != null && jqGridFilter.rules.Count() > 0)
+            if (jqGridFilter != null)
             {
-                return jqGridFilter.KreirajPredicate(entityType, getEntityFieldTypeFunction, ormEntityHelperClassesNamespace);
+                return jqGridFilter.KreirajPredicate(entityType, getEntityFieldTypeFunction);
             }
             else
             {
@@ -124,14 +130,14 @@ namespace NinjaSoftware.Api.CoolJ
         public IEnumerable<JqGridFilterItem> rules { get; set; }
 
         /// <summary>
-        /// Preko refleksije izvlači EntityField2 za filtriranje iz rules.
-        /// Ako je rules.Count == 0 vraća NULL.
+        /// Za svaki član this.rules kolekcije kreira jedan Predicate.
+        /// Ako je rules.Count == 0 vraća NULL
         /// </summary>
-        /// <param name="entityFieldsClass">Ako se filtriraju lijekovi onda LijekFields.</param>
         /// <returns>PredicateExpression</returns>
-		public PredicateExpression KreirajPredicate(Type entityFieldsClass, 
-			Func<string, Type> getEntityFieldTypeFunction,
-			string ormEntityHelperClassesNamespace)
+        /// <param name="entityFieldsType">Ako se filtrira artikl onda typeof(ArtiklFields)</param>
+		/// <param name="getEntityFieldTypeFunction">Funkcija prima string (EntityFields type name) a vraća tip. Ako se desi da se filtrira po entitetu vezanom na glavni entitet (RacunGlava.Partner) tada se koristi ova funkcija za dohvat EntityFieldsType preko refleksije.</param>
+		public PredicateExpression KreirajPredicate(Type entityFieldsType, 
+			Func<string, Type> getEntityFieldTypeFunction)
         {
             PredicateExpression toReturn = null;
 
@@ -141,7 +147,7 @@ namespace NinjaSoftware.Api.CoolJ
 
                 foreach (JqGridFilterItem item in rules)
                 {
-                    Predicate predicateToAdd = JgGridFilter.KreirajPredikatIzJqGridFilterItem(entityFieldsClass, item, getEntityFieldTypeFunction, ormEntityHelperClassesNamespace);
+                    Predicate predicateToAdd = JgGridFilter.KreirajPredikatIzJqGridFilterItem(entityFieldsType, item, getEntityFieldTypeFunction);
 
                     if (groupOp.ToUpper() == "AND")
                     {
@@ -156,15 +162,17 @@ namespace NinjaSoftware.Api.CoolJ
 
             return toReturn;
         }
-
+       
         /// <summary>
-        /// Preko refleksije izvlači EntityField2 za filtriranje iz rules.
+        /// Kreira predikat za JqGridFilterItem
         /// </summary>
-        /// <param name="entityFieldsClass">Ako se filtriraju lijekovi onda LijekFields.</param>
-        public static Predicate KreirajPredikatIzJqGridFilterItem(Type entityFieldsClass, 
+        /// <returns>The predikat iz jq grid filter item.</returns>
+        /// <param name="entityFieldsType">Ako se filtrira artikl onda typeof(ArtiklFields)</param>
+        /// <param name="jqGridFilterItem">Jedan item iz this.rules kolekcije</param>
+        /// <param name="getEntityFieldTypeFunction">Funkcija prima string (EntityFields type name) a vraća tip. Ako se desi da se filtrira po entitetu vezanom na glavni entitet (RacunGlava.Partner) tada se koristi ova funkcija za dohvat EntityFieldsType preko refleksije.</param>
+        public static Predicate KreirajPredikatIzJqGridFilterItem(Type entityFieldsType, 
 			JqGridFilterItem jqGridFilterItem, 
-			Func<string, Type> getEntityFieldTypeFunction,
-		    string ormEntityHelperClassesNamespace)
+			Func<string, Type> getEntityFieldTypeFunction)
         {
             string filterFieldName;
             string[] entityNames = jqGridFilterItem.field.Split('.');
@@ -173,16 +181,11 @@ namespace NinjaSoftware.Api.CoolJ
             // tada entityFieldClass nije onaj poslani nego DobavljacEntity.
             if (entityNames.Count() > 1)
             {
-				if (string.IsNullOrWhiteSpace (ormEntityHelperClassesNamespace)) 
-				{
-					throw new Exception ("OrmEntitiesHelperClassesNamespace is not set in config file");
-				}
-
                 filterFieldName = entityNames[entityNames.Count() - 1];
-				string typeName = string.Format ("{0}.{1}Fields", ormEntityHelperClassesNamespace, entityNames [entityNames.Count () - 2]);
-				entityFieldsClass = getEntityFieldTypeFunction (typeName); // Type.GetType(typeName);
+				string typeName = string.Format ("{0}Fields", entityNames [entityNames.Count () - 2]);
+				entityFieldsType = getEntityFieldTypeFunction (typeName); 
 
-				if (entityFieldsClass == null) 
+				if (entityFieldsType == null) 
 				{
 					throw new Exception (string.Format ("Type '{0}' does not exist", typeName)); 
 				}
@@ -192,7 +195,7 @@ namespace NinjaSoftware.Api.CoolJ
                 filterFieldName = jqGridFilterItem.field;
             }
 
-            EntityField2 filterField = (EntityField2)entityFieldsClass.GetProperty(filterFieldName, BindingFlags.Public | BindingFlags.Static).GetValue(null, null);
+            EntityField2 filterField = (EntityField2)entityFieldsType.GetProperty(filterFieldName, BindingFlags.Public | BindingFlags.Static).GetValue(null, null);
 
             FieldLikePredicate toReturn = new FieldLikePredicate(filterField, null, string.Format("{0}%", jqGridFilterItem.data.ToUpper()));
             toReturn.CaseSensitiveCollation = true;
