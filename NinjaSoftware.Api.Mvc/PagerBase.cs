@@ -111,7 +111,7 @@ namespace NinjaSoftware.Api.Mvc
 
         #region JqGrid
 
-        public static bool? IsJqgridSortAscending(string sord)
+        public static bool IsJqgridSortAscending(string sord)
         {
             if (string.IsNullOrWhiteSpace(sord))
             {
@@ -121,17 +121,15 @@ namespace NinjaSoftware.Api.Mvc
             return "asc" == sord.Trim().ToLowerInvariant();
         }
 
-        public string CreateJqGridRespose()
+        public dynamic CreateJqGridRespose()
         {
-            object result = new
+            return new
             {
                 page = this.CurrentPage,
                 total = this.NoOfPages,
                 records = this.NoOfRecords,
                 rows = this.DataSource
             };
-
-            return JsonConvert.SerializeObject(result);
         }
 
         #endregion
