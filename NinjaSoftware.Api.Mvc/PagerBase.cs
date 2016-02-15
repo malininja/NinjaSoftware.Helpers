@@ -29,7 +29,7 @@ namespace NinjaSoftware.Api.Mvc
             this.CurrentPage = currentPage.HasValue ? currentPage.Value : 1;
 
             string sort = string.IsNullOrWhiteSpace(sortField) ? this.DefaultSortField : sortField;
-            if (isSortAscending.HasValue)
+            if (!string.IsNullOrWhiteSpace(sortField) && isSortAscending.HasValue)
             {
                 this.IsSortDirectionAscending = isSortAscending.Value;
             }
@@ -111,11 +111,11 @@ namespace NinjaSoftware.Api.Mvc
 
         #region JqGrid
 
-        public static bool IsJqgridSortAscending(string sord)
+        public static bool? IsJqgridSortAscending(string sord)
         {
             if (string.IsNullOrWhiteSpace(sord))
             {
-                return false;
+                return null;
             }
 
             return "asc" == sord.Trim().ToLowerInvariant();
