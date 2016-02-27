@@ -111,7 +111,7 @@ namespace NinjaSoftware.Api.CoolJ
         	Type entityType,
 			Func<string, Type> getEntityFieldTypeFunction)
         {
-            JgGridFilter jqGridFilter = JsonConvert.DeserializeObject<JgGridFilter>(jqGridFilterString);
+            JqGridFilter jqGridFilter = JsonConvert.DeserializeObject<JqGridFilter>(jqGridFilterString);
 
             if (jqGridFilter != null)
             {
@@ -124,7 +124,7 @@ namespace NinjaSoftware.Api.CoolJ
         }
     }
 
-    public class JgGridFilter
+    public class JqGridFilter
     {
         public string groupOp { get; set; }
         public IEnumerable<JqGridFilterItem> rules { get; set; }
@@ -137,7 +137,7 @@ namespace NinjaSoftware.Api.CoolJ
         /// <param name="entityFieldsType">Ako se filtrira artikl onda typeof(ArtiklFields)</param>
 		/// <param name="getEntityFieldTypeFunction">Funkcija prima string (EntityFields type name) a vraća tip. Ako se desi da se filtrira po entitetu vezanom na glavni entitet (RacunGlava.Partner) tada se koristi ova funkcija za dohvat EntityFieldsType preko refleksije.</param>
 		public PredicateExpression KreirajPredicate(Type entityFieldsType, 
-			Func<string, Type> getEntityFieldTypeFunction)
+                                            Func<string, Type> getEntityFieldTypeFunction)
         {
             PredicateExpression toReturn = null;
 
@@ -147,15 +147,18 @@ namespace NinjaSoftware.Api.CoolJ
 
                 foreach (JqGridFilterItem item in rules)
                 {
-                    Predicate predicateToAdd = JgGridFilter.KreirajPredikatIzJqGridFilterItem(entityFieldsType, item, getEntityFieldTypeFunction);
-
-                    if (groupOp.ToUpper() == "AND")
+                    Predicate predicateToAdd = JqGridFilter.KreirajPredikatIzJqGridFilterItem(entityFieldsType, item, getEntityFieldTypeFunction);
+                    
+                    if (predicateToAdd != null)
                     {
-                        toReturn.AddWithAnd(predicateToAdd);
-                    }
-                    else if (groupOp.ToUpper() == "OR")
-                    {
-                        toReturn.AddWithOr(predicateToAdd);
+                        if (groupOp.ToUpper() == "AND")
+                        {
+                            toReturn.AddWithAnd(predicateToAdd);
+                        }
+                        else if (groupOp.ToUpper() == "OR")
+                        {
+                            toReturn.AddWithOr(predicateToAdd);
+                        }
                     }
                 }
             }
@@ -171,8 +174,8 @@ namespace NinjaSoftware.Api.CoolJ
         /// <param name="jqGridFilterItem">Jedan item iz this.rules kolekcije</param>
         /// <param name="getEntityFieldTypeFunction">Funkcija prima string (EntityFields type name) a vraća tip. Ako se desi da se filtrira po entitetu vezanom na glavni entitet (RacunGlava.Partner) tada se koristi ova funkcija za dohvat EntityFieldsType preko refleksije.</param>
         public static Predicate KreirajPredikatIzJqGridFilterItem(Type entityFieldsType, 
-			JqGridFilterItem jqGridFilterItem, 
-			Func<string, Type> getEntityFieldTypeFunction)
+                                                          JqGridFilterItem jqGridFilterItem, 
+                                                          Func<string, Type> getEntityFieldTypeFunction)
         {
             string filterFieldName;
             string[] entityNames = jqGridFilterItem.field.Split('.');
@@ -182,13 +185,13 @@ namespace NinjaSoftware.Api.CoolJ
             if (entityNames.Count() > 1)
             {
                 filterFieldName = entityNames[entityNames.Count() - 1];
-				string typeName = string.Format ("{0}Fields", entityNames [entityNames.Count () - 2]);
-				entityFieldsType = getEntityFieldTypeFunction (typeName); 
+                string typeName = string.Format("{0}Fields", entityNames[entityNames.Count() - 2]);
+                entityFieldsType = getEntityFieldTypeFunction(typeName); 
 
-				if (entityFieldsType == null) 
-				{
-					throw new Exception (string.Format ("Type '{0}' does not exist", typeName)); 
-				}
+                if (entityFieldsType == null)
+                {
+                    throw new Exception(string.Format("Type '{0}' does not exist", typeName)); 
+                }
             }
             else
             {
@@ -196,11 +199,95 @@ namespace NinjaSoftware.Api.CoolJ
             }
 
             EntityField2 filterField = (EntityField2)entityFieldsType.GetProperty(filterFieldName, BindingFlags.Public | BindingFlags.Static).GetValue(null, null);
-
-            FieldLikePredicate toReturn = new FieldLikePredicate(filterField, null, string.Format("{0}%", jqGridFilterItem.data.ToUpper()));
-            toReturn.CaseSensitiveCollation = true;
-
-            return toReturn;
+            
+            return CreatePredicateForType(filterField, jqGridFilterItem.data);
+        }
+        
+        private static Predicate CreatePredicateForType(EntityField2 filterField, string data)
+        {
+            Predicate predicate = null;
+            
+            if (filterField.DataType == typeof(string))
+            {
+                FieldLikePredicate likePredicate = new FieldLikePredicate(filterField, null, string.Format("{0}%", data.ToUpper()));
+                likePredicate.CaseSensitiveCollation = true;
+                
+                predicate = likePredicate;
+            }
+            else if (filterField.DataType == typeof(bool))
+            {
+                bool boolData;
+                
+                if (bool.TryParse(data, out boolData))
+                {
+                    predicate = filterField == boolData;
+                }
+            }
+            else if (filterField.DataType == typeof(byte))
+            {
+                byte byteData;
+                
+                if (byte.TryParse(data, out byteData))
+                {
+                    predicate = filterField == byteData;
+                }
+            }
+            else if (filterField.DataType == typeof(short))
+            {
+                short shortData;
+                
+                if (short.TryParse(data, out shortData))
+                {
+                    predicate = filterField == shortData;
+                }
+            }
+            else if (filterField.DataType == typeof(int))
+            {
+                int intData;
+                
+                if (int.TryParse(data, out intData))
+                {
+                    predicate = filterField == intData;
+                }
+            }
+            else if (filterField.DataType == typeof(long))
+            {
+                long longData;
+                
+                if (long.TryParse(data, out longData))
+                {
+                    predicate = filterField == longData;
+                }
+            }
+            else if (filterField.DataType == typeof(Single))
+            {
+                Single singleData;
+                
+                if (Single.TryParse(data, out singleData))
+                {
+                    predicate = filterField == singleData;
+                }
+            }
+            else if (filterField.DataType == typeof(double))
+            {
+                double doubleData;
+                
+                if (double.TryParse(data, out doubleData))
+                {
+                    predicate = filterField == doubleData;
+                }
+            }
+            else if (filterField.DataType == typeof(decimal))
+            {
+                decimal decimalData;
+                
+                if (decimal.TryParse(data, out decimalData))
+                {
+                    predicate = filterField == decimalData;
+                }
+            }
+            
+            return predicate;
         }
     }
 
